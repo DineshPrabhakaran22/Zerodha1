@@ -23,28 +23,32 @@ const allowedOrigins = [
   "https://zerodha1dashboard.vercel.app",
 ];
 
-// CORS middleware
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Access-Control-Allow-Credentials", "true");
-    res.setHeader(
-      "Access-Control-Allow-Methods",
-      "GET,POST,PUT,DELETE,OPTIONS"
-    );
-    res.setHeader(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization, X-Requested-With"
-    );
-  }
+// Allow CORS for any origin in the allowed list
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin (like curl or Postman)
+      if (!origin) return callback(null, true);
+      // remove trailing slash if present
+      const cleanOrigin = origin.replace(/\/$/, "");
+      if (allowedOrigins.includes(cleanOrigin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("CORS not allowed for this origin"), false);
+      }
+    },
+    credentials: true,
+  })
+);
 
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
-
-  next();
-});
+// Handle preflight for all routes
+app.options(
+  "*",
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 
 app.use(cookieParser());
 app.use(bodyParser.json());
