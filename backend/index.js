@@ -23,17 +23,26 @@ const allowedOrigins = [
   "https://zerodha1dashboard.vercel.app",
 ];
 
-app.use(cors({
-  origin: function(origin, callback){
-    if (!origin) return callback(null, true); // allow curl, Postman, etc.
-    if (allowedOrigins.includes(origin)){
-      return callback(null, true);
-    } else {
-      return callback(new Error("CORS not allowed for this origin"), false);
-    }
-  },
-  credentials: true,
-}));
+// CORS middleware
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization, X-Requested-With"
+    );
+  }
+
+  // Handle preflight request
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204); // No Content
+  }
+
+  next();
+});
 
 
 app.use(cookieParser());
