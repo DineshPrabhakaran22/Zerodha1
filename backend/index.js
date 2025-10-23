@@ -23,24 +23,23 @@ const allowedOrigins = [
   "https://zerodha1dashboard.vercel.app",
 ];
 
-app.use(cors({
-  origin: function(origin, callback){
-    if (!origin) return callback(null, true); // allow curl, Postman, etc.
-    if (allowedOrigins.includes(origin)){
-      return callback(null, true);
-    } else {
-      return callback(new Error("CORS not allowed for this origin"), false);
-    }
-  },
-  credentials: true,
-}));
-
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // allow curl, Postman, etc.
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("CORS not allowed for this origin"), false);
+      }
+    },
+    credentials: true,
+  })
+);
 
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(express.json());
-
-
 
 app.get("/allHoldings", async (req, res) => {
   let allHoldings = await HoldingsModel.find({});
